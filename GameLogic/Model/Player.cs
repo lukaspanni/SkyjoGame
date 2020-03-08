@@ -28,5 +28,27 @@ namespace GameLogic.Model
             TemporaryCard = Game.ExposedCard;
         }
 
+        public void Action(int x, int y)
+        {
+            if(TemporaryCard == null)
+            {
+                CurrentCardSet.Expose(x, y);
+            }
+            else
+            {
+                PlayingCard replaced = CurrentCardSet.Replace(TemporaryCard, x, y);
+                TemporaryCard = null;
+                Game.ExposedCard = replaced;
+            }
+            try
+            {
+                CurrentCardSet.RefreshSet();
+            }catch(RoundFinishedException rfe)
+            {
+                rfe.PlayerSource = this;
+                Game.Notify(rfe);
+            }
+        }
+
     }
 }

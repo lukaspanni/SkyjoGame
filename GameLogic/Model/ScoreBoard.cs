@@ -6,7 +6,24 @@ namespace GameLogic.Model
 {
     class ScoreBoard
     {
-        public Dictionary<Player, int> Scores { get; set; }
+        public Dictionary<Player, int> Scores { get; private set; }
+        
+        public ScoreBoard(List<Player> players)
+        {
+            Scores = new Dictionary<Player, int>(players.Count);
+            foreach (Player player in players)
+            {
+                Scores.Add(player, 0);
+            }
+        }
+
+        public void UpdateScores(List<Player> players)
+        {
+            foreach (Player player in players)
+            {
+                Scores[player] += player.CurrentCardSet.ExposedValueSum;
+            }
+        }
 
     }
 }

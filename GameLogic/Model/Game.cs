@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace GameLogic.Model
 {
@@ -12,7 +13,8 @@ namespace GameLogic.Model
         public List<Player> Players { get; private set; }
         public byte CurrentPlayer { get; private set; } = 0;
         public PlayingCard CoveredStackTop { get => _coveredStack.Dequeue(); }
-        public PlayingCard ExposedCard { get; private set; } = null;
+        public PlayingCard ExposedCard { get; set; } = null;
+        public ScoreBoard ScoreBoard { get; set; }
 
 
         public Game(IEnumerable<Player> players)
@@ -37,6 +39,7 @@ namespace GameLogic.Model
             return cards;
         }
 
+
         private void DistributeCards(List<PlayingCard> cards)
         {
             foreach (Player player in Players)
@@ -60,21 +63,21 @@ namespace GameLogic.Model
             }
         }
 
-    }
-
-    public static class ListHelper
-    {
-        private static readonly Random random = new Random();
-        public static void Shuffle<T>(this IList<T> list)
+        internal void Notify(Exception exception)
         {
-            int n = list.Count;
-            while (n > 1)
+            if (exception is RoundFinishedException)
             {
-                n--;
-                int k = random.Next(n + 1);
-                T value = list[k];
-                list[k] = list[n];
-                list[n] = value;
+                RoundFinishedException rfe = exception as RoundFinishedException;
+                foreach (Player player in Players)
+                {
+                    if(player == rfe.PlayerSource) continue;
+                    player.CurrentCardSet.ExposeAll();
+                }
+                if(rfe.PlayerSource.CurrentCardSet.ExposedValueSum >= Players.Min(p => p.CurrentCardSet.ExposedValueSum))
+                {
+                    rfe.PlayerSource.CurrentCardSet.DoubleSum();
+                }
+                ScoreBoard.UpdateScores(Players);
             }
         }
 

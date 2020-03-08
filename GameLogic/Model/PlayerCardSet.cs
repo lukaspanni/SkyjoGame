@@ -24,9 +24,10 @@ namespace GameLogic.Model
         /// <summary>
         /// Refresh Current Card Set and Calculate Sum
         /// </summary>
-        private void RefreshSet()
+        public void RefreshSet()
         {
             int sum = 0;
+            int exposedCount = 0;
             for (int i = 0; i < Cards.GetLength(0); i++)
             {
                 for (int j = 0; j < Cards.GetLength(1); j++)
@@ -43,9 +44,15 @@ namespace GameLogic.Model
                     }
                     if (Cards[i, j].Exposed)
                     {
-                        sum += 1;
+                        exposedCount += 1;
+                        sum += Cards[i,j].Value;
                     }
                 }
+            }
+            ExposedValueSum = sum;
+            if(exposedCount == Cards.Length)
+            {
+                throw new RoundFinishedException();
             }
         }
 
@@ -61,7 +68,6 @@ namespace GameLogic.Model
         {
             CheckDimensions(x, y);
             Cards[x, y].Exposed = true;
-            RefreshSet();
         }
 
         public PlayingCard Replace(PlayingCard replacement, int x, int y)
@@ -70,8 +76,23 @@ namespace GameLogic.Model
             replacement.Exposed = true;
             PlayingCard card = Cards[x, y];
             Cards[x, y] = replacement;
-            RefreshSet();
             return card;
+        }
+
+        internal void ExposeAll()
+        {
+            int sum = 0;
+            foreach (PlayingCard card in Cards)
+            {
+                card.Exposed = true;
+                sum += card.Value;
+            }
+            ExposedValueSum = sum;
+        }
+
+        internal void DoubleSum()
+        {
+            ExposedValueSum *= 2;
         }
     }
 }
