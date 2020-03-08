@@ -1,0 +1,77 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Linq;
+
+namespace GameLogic.Model
+{
+    class PlayerCardSet
+    {
+        private PlayingCard[,] _cards;
+
+        public PlayingCard[,] Cards { get => _cards; private set { _cards = value; RefreshSet(); } }
+        public int ExposedValueSum { get; private set; }
+
+        public PlayerCardSet(PlayingCard[,] cards)
+        {
+            foreach (PlayingCard card in cards)
+            {
+                card.Exposed = false;
+            }
+            Cards = cards;
+        }
+
+        /// <summary>
+        /// Refresh Current Card Set and Calculate Sum
+        /// </summary>
+        private void RefreshSet()
+        {
+            int sum = 0;
+            for (int i = 0; i < Cards.GetLength(0); i++)
+            {
+                for (int j = 0; j < Cards.GetLength(1); j++)
+                {
+                    if(i == 0)
+                    {
+                        if(Cards[i,j].Exposed && Cards[i+1,j].Exposed && Cards[i + 2, j].Exposed)
+                        {
+                            if(Cards[i,j].Value == Cards[i+1,j].Value && Cards[i,j].Value == Cards[i + 2, j].Value)
+                            {
+                                //TODO: Solution for removing Cards safely
+                            }
+                        }
+                    }
+                    if (Cards[i, j].Exposed)
+                    {
+                        sum += 1;
+                    }
+                }
+            }
+        }
+
+        private void CheckDimensions(int x, int y)
+        {
+            if (x <= Cards.GetLength(0) && y <= Cards.GetLength(1))
+            {
+                throw new ArgumentOutOfRangeException("Invalid Indices");
+            }
+        }
+
+        public void Expose(int x, int y)
+        {
+            CheckDimensions(x, y);
+            Cards[x, y].Exposed = true;
+            RefreshSet();
+        }
+
+        public PlayingCard Replace(PlayingCard replacement, int x, int y)
+        {
+            CheckDimensions(x, y);
+            replacement.Exposed = true;
+            PlayingCard card = Cards[x, y];
+            Cards[x, y] = replacement;
+            RefreshSet();
+            return card;
+        }
+    }
+}

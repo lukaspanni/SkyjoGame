@@ -4,7 +4,9 @@ using System.Text;
 
 namespace GameLogic.Model
 {
-    class CardSet
+    class ScoreBoard
     {
+        public Dictionary<Player, int> Scores { get; set; }
+
     }
 }
