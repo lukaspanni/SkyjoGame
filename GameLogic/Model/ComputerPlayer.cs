@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GameLogic.Model
 {
-    class ComputerPlayer : Player
+    public class ComputerPlayer : Player
     {
         //TODO
     }

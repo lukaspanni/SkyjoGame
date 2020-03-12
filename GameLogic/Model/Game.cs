@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace GameLogic.Model
 {
-    class Game
+    public class Game
     {
         private Queue<PlayingCard> _coveredStack;
 

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace GameLogic.Model
 {
-    class PlayerCardSet
+    public class PlayerCardSet
     {
         private PlayingCard[,] _cards;
 
@@ -32,54 +32,73 @@ namespace GameLogic.Model
             {
                 for (int j = 0; j < Cards.GetLength(1); j++)
                 {
-                    if(i == 0)
+                    if (i == 0)
                     {
-                        if(Cards[i,j].Exposed && Cards[i+1,j].Exposed && Cards[i + 2, j].Exposed)
+                        if (Cards[i, j] != null)
                         {
-                            if(Cards[i,j].Value == Cards[i+1,j].Value && Cards[i,j].Value == Cards[i + 2, j].Value)
+                            if (Cards[i, j].Exposed && Cards[i + 1, j].Exposed && Cards[i + 2, j].Exposed)
                             {
-                                //TODO: Solution for removing Cards safely
+                                if (Cards[i, j].Value == Cards[i + 1, j].Value && Cards[i, j].Value == Cards[i + 2, j].Value)
+                                {
+                                    Cards[i, j] = null;
+                                    Cards[i + 1, j] = null;
+                                    Cards[i + 2, j] = null;
+                                }
                             }
                         }
                     }
-                    if (Cards[i, j].Exposed)
+                    if (Cards[i,j] != null && Cards[i, j].Exposed)
                     {
                         exposedCount += 1;
-                        sum += Cards[i,j].Value;
+                        sum += Cards[i, j].Value;
                     }
                 }
             }
             ExposedValueSum = sum;
-            if(exposedCount == Cards.Length)
+            if (exposedCount == Cards.Length)
             {
                 throw new RoundFinishedException();
             }
         }
 
-        private void CheckDimensions(int x, int y)
+        private bool CheckDimensions(int x, int y)
         {
             if (x <= Cards.GetLength(0) && y <= Cards.GetLength(1))
             {
-                throw new ArgumentOutOfRangeException("Invalid Indices");
+                return true;
             }
+            return false;
         }
 
         public void Expose(int x, int y)
         {
-            CheckDimensions(x, y);
-            Cards[x, y].Exposed = true;
+            if (CheckDimensions(x, y))
+            {
+                Cards[x, y].Exposed = true;
+            }
         }
 
         public PlayingCard Replace(PlayingCard replacement, int x, int y)
         {
-            CheckDimensions(x, y);
-            replacement.Exposed = true;
-            PlayingCard card = Cards[x, y];
-            Cards[x, y] = replacement;
-            return card;
+            if (CheckDimensions(x, y))
+            {
+                replacement.Exposed = true;
+                PlayingCard card = Cards[x, y];
+                Cards[x, y] = replacement;
+                if (card.Exposed)
+                {
+                    ExposedValueSum += (replacement.Value - card.Value);
+                }
+                else
+                {
+                    ExposedValueSum += replacement.Value;
+                }
+                return card;
+            }
+            return null;
         }
 
-        internal void ExposeAll()
+        public void ExposeAll()
         {
             int sum = 0;
             foreach (PlayingCard card in Cards)
@@ -90,9 +109,13 @@ namespace GameLogic.Model
             ExposedValueSum = sum;
         }
 
-        internal void DoubleSum()
+        public void DoubleSum()
         {
-            ExposedValueSum *= 2;
+            if (ExposedValueSum > 0)
+            {
+                ExposedValueSum *= 2;
+
+            }
         }
     }
 }

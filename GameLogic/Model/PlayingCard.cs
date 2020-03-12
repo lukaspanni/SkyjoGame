@@ -4,11 +4,11 @@ using System.Text;
 
 namespace GameLogic.Model
 {
-    class PlayingCard
+   public class PlayingCard
     {
         private static readonly short lowerBound = -2;
         private static readonly short upperBound = 12;
-        private int _value;
+        private short _value;
 
         public static short MinValue { get => lowerBound; }
         public static short MaxValue { get => upperBound; }

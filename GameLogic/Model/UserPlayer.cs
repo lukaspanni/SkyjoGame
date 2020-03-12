@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GameLogic.Model
 {
-    class UserPlayer : Player
+    public class UserPlayer : Player
     {
         public string Name { get; set; }
 

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GameLogic.Model
 {
-    abstract class Player
+    public abstract class Player
     {
 
         public PlayingCard TemporaryCard { get; set; }
