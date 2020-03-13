@@ -6,17 +6,16 @@ using Xunit;
 
 namespace GameLogicTests
 {
-    public class PlayerSet_Tests
+    public class CardSetTests
     {
         private readonly PlayerCardSet cardSet;
-        private PlayingCard[,] cards;
-        private int xdim = 4;
-        private int ydim = 4;
+        private int xdim = 3;
+        private int ydim = 3;
         private short card_value = 1;
 
-        public PlayerSet_Tests()
+        public CardSetTests()
         {
-            cards = new PlayingCard[xdim, ydim];
+            PlayingCard[,] cards = new PlayingCard[xdim, ydim];
             for (int i = 0; i < cards.GetLength(0); i++)
             {
                 for (int j = 0; j < cards.GetLength(1); j++)
@@ -31,7 +30,7 @@ namespace GameLogicTests
         public void CardSet_ExposeAll_Sum()
         {
             cardSet.ExposeAll();
-            Assert.Equal(4 * 4 * card_value, cardSet.ExposedValueSum);
+            Assert.Equal(xdim * ydim * card_value, cardSet.ExposedValueSum);
         }
 
         [Fact]
@@ -39,10 +38,7 @@ namespace GameLogicTests
         {
             cardSet.ExposeAll();
             cardSet.RefreshSet();   //should remove all because all values are equal
-            foreach (var item in cardSet.Cards)
-            {
-                Assert.Null(item);
-            }
+            Assert.Null(cardSet.Cards[0, 0]);
             Assert.Equal(0, cardSet.ExposedValueSum);
         }
 
@@ -56,5 +52,15 @@ namespace GameLogicTests
             Assert.Same(card, cardSet.Cards[1, 1]);
         }
 
+        [Theory]
+        [InlineData(13, 16, 255)]
+        [InlineData(-3, -5, -9)]
+        [InlineData(4096, 32767, -32768)]
+        public void PlayingCard_Value_SetInvalid(short v1, short v2, short v3)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => cardSet.Cards[0, 0].Value = v1);
+            Assert.Throws<ArgumentOutOfRangeException>(() => cardSet.Cards[0, 0].Value = v2);
+            Assert.Throws<ArgumentOutOfRangeException>(() => cardSet.Cards[0, 0].Value = v3);
+        }
     }
 }
