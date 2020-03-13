@@ -53,6 +53,24 @@ namespace GameLogicTests
         }
 
         [Theory]
+        [InlineData(1, 1, 1, false)]
+        [InlineData(2, 1, 5, true)]
+        [InlineData(0, 2, -1, false)]
+        public void CardSet_Replace_Sum(int x, int y, short val, bool expose)
+        {
+            PlayingCard card = new PlayingCard(val);
+            if (expose)
+            {
+                cardSet.Expose(x, y);
+                Assert.Equal(cardSet.Cards[x,y].Value, cardSet.ExposedValueSum);
+            }
+
+            cardSet.Replace(card, x, y);
+            Assert.Equal(val, cardSet.ExposedValueSum);
+            
+        }
+
+        [Theory]
         [InlineData(13, 16, 255)]
         [InlineData(-3, -5, -9)]
         [InlineData(4096, 32767, -32768)]

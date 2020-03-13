@@ -47,7 +47,7 @@ namespace GameLogic.Model
                             }
                         }
                     }
-                    if (Cards[i,j] != null && Cards[i, j].Exposed)
+                    if (Cards[i, j] != null && Cards[i, j].Exposed)
                     {
                         exposedCount += 1;
                         sum += Cards[i, j].Value;
@@ -72,9 +72,10 @@ namespace GameLogic.Model
 
         public void Expose(int x, int y)
         {
-            if (CheckDimensions(x, y))
+            if (CheckDimensions(x, y) && !Cards[x, y].Exposed)
             {
                 Cards[x, y].Exposed = true;
+                ExposedValueSum += Cards[x, y].Value;
             }
         }
 
