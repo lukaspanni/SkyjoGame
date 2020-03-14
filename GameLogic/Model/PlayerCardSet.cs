@@ -77,6 +77,7 @@ namespace GameLogic.Model
                 Cards[x, y].Exposed = true;
                 ExposedValueSum += Cards[x, y].Value;
             }
+            //TODO: Notify caller that Expose Failed => Exception
         }
 
         public PlayingCard Replace(PlayingCard replacement, int x, int y)

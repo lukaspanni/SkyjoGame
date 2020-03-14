@@ -65,20 +65,18 @@ namespace GameLogic.Model
 
         internal void Notify(Exception exception)
         {
-            if (exception is RoundFinishedException)
+            if (!(exception is RoundFinishedException)) return;
+            RoundFinishedException rfe = exception as RoundFinishedException;
+            foreach (Player player in Players)
             {
-                RoundFinishedException rfe = exception as RoundFinishedException;
-                foreach (Player player in Players)
-                {
-                    if(player == rfe.PlayerSource) continue;
-                    player.CurrentCardSet.ExposeAll();
-                }
-                if(rfe.PlayerSource.CurrentCardSet.ExposedValueSum >= Players.Min(p => p.CurrentCardSet.ExposedValueSum))
-                {
-                    rfe.PlayerSource.CurrentCardSet.DoubleSum();
-                }
-                ScoreBoard.UpdateScores(Players);
+                if(player == rfe.PlayerSource) continue;
+                player.CurrentCardSet.ExposeAll();
             }
+            if(rfe.PlayerSource.CurrentCardSet.ExposedValueSum >= Players.Min(p => p.CurrentCardSet.ExposedValueSum))
+            {
+                rfe.PlayerSource.CurrentCardSet.DoubleSum();
+            }
+            ScoreBoard.UpdateScores(Players);
         }
 
     }
