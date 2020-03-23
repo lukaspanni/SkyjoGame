@@ -44,7 +44,7 @@ namespace GameLogic.Model
         {
             foreach (Player player in Players)
             {
-                PlayingCard[,] playerCards = new PlayingCard[4, 4];
+                PlayingCard[,] playerCards = new PlayingCard[PlayerCardSet.columnCount, PlayerCardSet.rowCount];
                 try
                 {
                     for (int i = 0; i < playerCards.GetLength(0); i++)

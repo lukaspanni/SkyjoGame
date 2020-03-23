@@ -12,13 +12,24 @@ namespace GameLogic.Model
         public PlayingCard[,] Cards { get => _cards; private set { _cards = value; RefreshSet(); } }
         public int ExposedValueSum { get; private set; }
 
+        public static readonly int columnCount = 4;
+        public static readonly int rowCount = 3;
+
         public PlayerCardSet(PlayingCard[,] cards)
         {
-            foreach (PlayingCard card in cards)
+            if (cards.GetLength(0) == rowCount && cards.GetLength(1) == columnCount)
             {
-                card.Exposed = false;
+                foreach (PlayingCard card in cards)
+                {
+                    card.Exposed = false;
+                }
+
+                Cards = cards;
             }
-            Cards = cards;
+            else
+            {
+                Cards = new PlayingCard[rowCount,columnCount];
+            }
         }
 
         /// <summary>

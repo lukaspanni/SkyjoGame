@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GameLogic": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

@@ -9,13 +9,11 @@ namespace GameLogicTests
     public class CardSetTests
     {
         private readonly PlayerCardSet cardSet;
-        private int xdim = 3;
-        private int ydim = 3;
         private short card_value = 1;
 
         public CardSetTests()
         {
-            PlayingCard[,] cards = new PlayingCard[xdim, ydim];
+            PlayingCard[,] cards = new PlayingCard[PlayerCardSet.rowCount, PlayerCardSet.columnCount];
             for (int i = 0; i < cards.GetLength(0); i++)
             {
                 for (int j = 0; j < cards.GetLength(1); j++)
@@ -30,7 +28,7 @@ namespace GameLogicTests
         public void CardSet_ExposeAll_Sum()
         {
             cardSet.ExposeAll();
-            Assert.Equal(xdim * ydim * card_value, cardSet.ExposedValueSum);
+            Assert.Equal(PlayerCardSet.rowCount * PlayerCardSet.columnCount * card_value, cardSet.ExposedValueSum);
         }
 
         [Fact]
