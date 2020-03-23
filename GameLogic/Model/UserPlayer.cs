@@ -11,6 +11,7 @@ namespace GameLogic.Model
         public UserPlayer(string name) : base(null, null)
         {
             Name = name;
+            Id = name;
         }
     }
 }

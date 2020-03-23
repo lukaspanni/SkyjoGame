@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using GameLogic;
 using GameLogic.Model;
 using Xunit;
 
@@ -35,7 +36,7 @@ namespace GameLogicTests
         public void CardSet_RefreshSet_RemoveSum0()
         {
             cardSet.ExposeAll();
-            cardSet.RefreshSet();   //should remove all because all values are equal
+            Assert.Throws<RoundFinishedException>(() => cardSet.RefreshSet());   //should remove all because all values are equal
             Assert.Null(cardSet.Cards[0, 0]);
             Assert.Equal(0, cardSet.ExposedValueSum);
         }
@@ -46,7 +47,7 @@ namespace GameLogicTests
             short val = (short)(card_value - 1);
             PlayingCard card = new PlayingCard(val);
             cardSet.ExposeAll();
-            cardSet.Replace(card, 1, 1);
+            cardSet.Replace(card, (1, 1));
             Assert.Same(card, cardSet.Cards[1, 1]);
         }
 
@@ -54,16 +55,17 @@ namespace GameLogicTests
         [InlineData(1, 1, 1, false)]
         [InlineData(2, 1, 5, true)]
         [InlineData(0, 2, -1, false)]
-        public void CardSet_Replace_Sum(int x, int y, short val, bool expose)
+        public void CardSet_Replace_Sum(byte x, byte y, short val, bool expose)
         {
+            (byte, byte) coordinates = (x, y);
             PlayingCard card = new PlayingCard(val);
             if (expose)
             {
-                cardSet.Expose(x, y);
+                cardSet.Expose(coordinates);
                 Assert.Equal(cardSet.Cards[x,y].Value, cardSet.ExposedValueSum);
             }
 
-            cardSet.Replace(card, x, y);
+            cardSet.Replace(card,coordinates);
             Assert.Equal(val, cardSet.ExposedValueSum);
             
         }

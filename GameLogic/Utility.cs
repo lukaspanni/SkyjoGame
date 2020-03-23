@@ -6,7 +6,7 @@ using GameLogic.Model;
 
 namespace GameLogic
 {
-    class RoundFinishedException : Exception
+    public class RoundFinishedException : Exception
     {
         public Player PlayerSource { get; set; }
         public RoundFinishedException()

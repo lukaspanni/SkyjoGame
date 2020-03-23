@@ -22,6 +22,8 @@ namespace GameLogic.Model
             Players = new List<Player>(players);
             List<PlayingCard> cards = CreateGameCards();
             DistributeCards(cards);
+            ExposedCard = cards[0];
+            cards.RemoveAt(0);
             _coveredStack = new Queue<PlayingCard>(cards);
         }
 
@@ -67,6 +69,7 @@ namespace GameLogic.Model
         {
             if (!(exception is RoundFinishedException)) return;
             RoundFinishedException rfe = exception as RoundFinishedException;
+            //TODO: Change to match game rules (every player has one last action)
             foreach (Player player in Players)
             {
                 if(player == rfe.PlayerSource) continue;

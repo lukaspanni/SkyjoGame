@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Linq;
 
@@ -58,7 +59,11 @@ namespace GameLogic.Model
                             }
                         }
                     }
-                    if (Cards[i, j] != null && Cards[i, j].Exposed)
+                    if (Cards[i, j] == null)
+                    {
+                        exposedCount += 1;  // null-card counts as exposed
+                    }
+                    else if (Cards[i, j].Exposed)
                     {
                         exposedCount += 1;
                         sum += Cards[i, j].Value;
@@ -72,32 +77,32 @@ namespace GameLogic.Model
             }
         }
 
-        private bool CheckDimensions(int x, int y)
+        private bool CheckDimensions((byte,byte) coordinates)
         {
-            if (x <= Cards.GetLength(0) && y <= Cards.GetLength(1))
+            if (coordinates.Item1 <= Cards.GetLength(0) && coordinates.Item2 <= Cards.GetLength(1))
             {
                 return true;
             }
             return false;
         }
 
-        public void Expose(int x, int y)
+        public void Expose((byte,byte) coordinates)
         {
-            if (CheckDimensions(x, y) && !Cards[x, y].Exposed)
+            if (CheckDimensions(coordinates) && !Cards[coordinates.Item1, coordinates.Item2].Exposed)
             {
-                Cards[x, y].Exposed = true;
-                ExposedValueSum += Cards[x, y].Value;
+                Cards[coordinates.Item1, coordinates.Item2].Exposed = true;
+                ExposedValueSum += Cards[coordinates.Item1, coordinates.Item2].Value;
             }
             //TODO: Notify caller that Expose Failed => Exception
         }
 
-        public PlayingCard Replace(PlayingCard replacement, int x, int y)
+        public PlayingCard Replace(PlayingCard replacement, (byte, byte) coordinates)
         {
-            if (CheckDimensions(x, y))
+            if (CheckDimensions(coordinates))
             {
                 replacement.Exposed = true;
-                PlayingCard card = Cards[x, y];
-                Cards[x, y] = replacement;
+                PlayingCard card = Cards[coordinates.Item1, coordinates.Item2];
+                Cards[coordinates.Item1, coordinates.Item2] = replacement;
                 if (card.Exposed)
                 {
                     ExposedValueSum += (replacement.Value - card.Value);

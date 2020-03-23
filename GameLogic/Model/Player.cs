@@ -6,17 +6,19 @@ namespace GameLogic.Model
 {
     public abstract class Player
     {
-
         public PlayingCard TemporaryCard { get; set; }
         public PlayerCardSet CurrentCardSet { get; set; }
         public Game Game { get; private set; }
+        public string Id { get; protected set; }
 
         public Player() : this(null, null) { }
         public Player(PlayerCardSet initialCardSet, Game game)
         {
             CurrentCardSet = initialCardSet;
             Game = game;
+            Id = CurrentCardSet.GetHashCode().ToString();
         }
+
 
         public void DrawCovered()
         {
@@ -28,18 +30,21 @@ namespace GameLogic.Model
             TemporaryCard = Game.ExposedCard;
         }
 
-        public void Action(int x, int y)
+
+        public void CardAction((byte,byte)coordinates, bool replace)
         {
-            if(TemporaryCard == null)
+            if (TemporaryCard == null) throw new InvalidOperationException("A card has to be drawn before this method is called");
+            if (replace)
             {
-                CurrentCardSet.Expose(x, y);
+                PlayingCard replaced = CurrentCardSet.Replace(TemporaryCard, coordinates);
+                Game.ExposedCard = replaced;
             }
             else
             {
-                PlayingCard replaced = CurrentCardSet.Replace(TemporaryCard, x, y);
-                TemporaryCard = null;
-                Game.ExposedCard = replaced;
+                CurrentCardSet.Expose(coordinates);
+                Game.ExposedCard = TemporaryCard;
             }
+            TemporaryCard = null;
             try
             {
                 CurrentCardSet.RefreshSet();
@@ -50,12 +55,12 @@ namespace GameLogic.Model
             }
         }
 
-        public void FirstTurnAction(int x1, int y1, int x2, int y2)
+        public void FirstTurnAction((byte, byte) c1, (byte,byte) c2)
         {
-            if (x1 != x2 || y1 != y2)
+            if (c1.Item1 != c2.Item1 || c1.Item2 != c2.Item2)
             {
-                CurrentCardSet.Expose(x1, y1);
-                CurrentCardSet.Expose(x2, y2);
+                CurrentCardSet.Expose(c1);
+                CurrentCardSet.Expose(c2);
             }
         }
 
