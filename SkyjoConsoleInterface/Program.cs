@@ -22,13 +22,11 @@ namespace SkyjoConsoleInterface
                     Console.Write("Player-{0} Name: ", player_count++);
                     input = Console.ReadLine();
                 }
-
                 if (players.Count < 2)
                 {
                     Console.WriteLine("At least 2 players required");
                     Environment.Exit(0);
                 }
-
             }
             else
             {
@@ -37,8 +35,20 @@ namespace SkyjoConsoleInterface
                     players.Add(new UserPlayer(name));
                 }
             }
+
             Game game = new Game(players);
-            //Start game - First Turn Action (expose 2 cards per player)
+            while (!game.GameFinished)
+            {
+                PlayRound(game);
+            }
+            //TODO: display finish message
+
+        }
+
+        private static void PlayRound(Game game)
+        {
+            //TODO: show card values to players
+            // First Turn Action
             foreach (Player player in game.Players)
             {
                 Console.WriteLine("{0} Expose 2 cards:", player.Id);
@@ -58,37 +68,54 @@ namespace SkyjoConsoleInterface
                 } while (coor2 == null);
                 player.FirstTurnAction(coor1.Value, coor2.Value);
             }
-            //Then: for each player do Action
+
+            while (!game.RoundFinished)
+            {
+                foreach (Player player in game.Players)
+                {
+                    RoundAction(player);
+                    if (game.RoundFinished) break;
+                }
+            }
+            // Round Finished, every player has one last Action
             foreach (Player player in game.Players)
             {
-                Console.WriteLine("{0} your turn: ", player.Id);
-                bool? draw_choice;
-                do
-                {
-                    Console.Write("Draw exposed card (0) or draw covered card (1): ");
-                    draw_choice = ParseBooleanInput(Console.ReadLine());
-                } while (draw_choice == null);
-
-                if (draw_choice.Value) player.DrawCovered();
-                else player.DrawExposed();
-
-                Console.WriteLine("The value of the drawn card is {0}.\n", player.TemporaryCard);
-                bool? replace_choice;
-                do
-                {
-                    Console.Write("Expose a card (0) or replace a card (1)");
-                    replace_choice = ParseBooleanInput(Console.ReadLine());
-                } while (replace_choice == null);
-
-                (byte, byte)? coordinates;
-                do
-                {
-                    Console.Write("{0} card at coordinates (x,y):", replace_choice.Value ? "Replace" : "Expose");
-                    coordinates = ParseCoordinateInput(Console.ReadLine());
-                } while (coordinates == null);
-                player.CardAction(coordinates.Value, replace_choice.Value);
+                if (player == game.RoundFinishingPlayer) break;
+                RoundAction(player);
             }
-            //Until: one player finished => RoundFinishedException
+            game.FinishRound();
+            //TODO: display round stats
+        }
+
+        private static void RoundAction(Player player)
+        {
+            Console.WriteLine("{0} your turn: ", player.Id);
+            bool? draw_choice;
+            do
+            {
+                Console.Write("Draw exposed card (0) or draw covered card (1): ");
+                draw_choice = ParseBooleanInput(Console.ReadLine());
+            } while (draw_choice == null);
+
+            if (draw_choice.Value) player.DrawCovered();
+            else player.DrawExposed();
+
+            Console.WriteLine("The value of the drawn card is {0}.\n", player.TemporaryCard);
+            bool? replace_choice;
+            do
+            {
+                Console.Write("Expose a card (0) or replace a card (1)");
+                replace_choice = ParseBooleanInput(Console.ReadLine());
+            } while (replace_choice == null);
+
+            (byte, byte)? coordinates;
+            do
+            {
+                Console.Write("{0} card at coordinates (x,y):", replace_choice.Value ? "Replace" : "Expose");
+                coordinates = ParseCoordinateInput(Console.ReadLine());
+            } while (coordinates == null);
+
+            player.CardAction(coordinates.Value, replace_choice.Value);
         }
 
         private static (byte, byte)? ParseCoordinateInput(string input)

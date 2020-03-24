@@ -10,8 +10,10 @@ namespace GameLogic.Model
         private Queue<PlayingCard> _coveredStack;
 
         public byte RoundCounter { get; set; } = 0;
+        public bool RoundFinished { get; private set; } = false;
+        public bool GameFinished { get; private set; } = false;
         public List<Player> Players { get; private set; }
-        public byte CurrentPlayer { get; private set; } = 0;
+        public Player RoundFinishingPlayer { get; private set; }
         public PlayingCard CoveredStackTop { get => _coveredStack.Dequeue(); }
         public PlayingCard ExposedCard { get; set; } = null;
         public ScoreBoard ScoreBoard { get; set; }
@@ -20,11 +22,42 @@ namespace GameLogic.Model
         public Game(IEnumerable<Player> players)
         {
             Players = new List<Player>(players);
+            ScoreBoard = new ScoreBoard(Players);
+            ScoreBoard.MaxPointsReached += ScoreBoardOnMaxPointsReached;
+            StartRound();
+        }
+
+        public void StartRound()
+        {
+            if (GameFinished) return;
+            RoundFinished = false;
+            //TODO: Cache Cards, dont create every round
             List<PlayingCard> cards = CreateGameCards();
             DistributeCards(cards);
             ExposedCard = cards[0];
             cards.RemoveAt(0);
             _coveredStack = new Queue<PlayingCard>(cards);
+        }
+
+        public void FinishRound()
+        {
+            foreach (Player player in Players)
+            {
+                if(player == RoundFinishingPlayer) continue;
+                player.CurrentCardSet.ExposeAll();
+            }
+            if (RoundFinishingPlayer?.CurrentCardSet.ExposedValueSum > Players.Min(p => p.CurrentCardSet.ExposedValueSum))
+            {
+                RoundFinishingPlayer.CurrentCardSet.DoubleSum();
+            }
+            ScoreBoard.UpdateScores(Players);
+            RoundFinishingPlayer = null;
+            RoundCounter++;
+        }
+
+        private void ScoreBoardOnMaxPointsReached(object sender, EventArgs e)
+        {
+            GameFinished = true;
         }
 
         private List<PlayingCard> CreateGameCards()
@@ -69,17 +102,11 @@ namespace GameLogic.Model
         {
             if (!(exception is RoundFinishedException)) return;
             RoundFinishedException rfe = exception as RoundFinishedException;
-            //TODO: Change to match game rules (every player has one last action)
-            foreach (Player player in Players)
+            if (!RoundFinished)
             {
-                if(player == rfe.PlayerSource) continue;
-                player.CurrentCardSet.ExposeAll();
+                RoundFinished = true;
+                RoundFinishingPlayer = rfe.PlayerSource;
             }
-            if(rfe.PlayerSource.CurrentCardSet.ExposedValueSum >= Players.Min(p => p.CurrentCardSet.ExposedValueSum))
-            {
-                rfe.PlayerSource.CurrentCardSet.DoubleSum();
-            }
-            ScoreBoard.UpdateScores(Players);
         }
 
     }
