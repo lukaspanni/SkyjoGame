@@ -10,7 +10,7 @@ namespace GameLogic.Model
         private Queue<PlayingCard> _coveredStack;
 
         public byte RoundCounter { get; set; } = 0;
-        public bool RoundFinished { get; private set; } = false;
+        public bool LastAction { get; private set; } = false;
         public bool GameFinished { get; private set; } = false;
         public List<Player> Players { get; private set; }
         public Player RoundFinishingPlayer { get; private set; }
@@ -22,15 +22,16 @@ namespace GameLogic.Model
         public Game(IEnumerable<Player> players)
         {
             Players = new List<Player>(players);
+            Players.ForEach(p => p.Game = this);
             ScoreBoard = new ScoreBoard(Players);
-            ScoreBoard.MaxPointsReached += ScoreBoardOnMaxPointsReached;
+            ScoreBoard.PointsThresholdReached += ScoreBoardOnPointsThresholdReached;
             StartRound();
         }
 
         public void StartRound()
         {
             if (GameFinished) return;
-            RoundFinished = false;
+            LastAction = false;
             //TODO: Cache Cards, dont create every round
             List<PlayingCard> cards = CreateGameCards();
             DistributeCards(cards);
@@ -55,7 +56,7 @@ namespace GameLogic.Model
             RoundCounter++;
         }
 
-        private void ScoreBoardOnMaxPointsReached(object sender, EventArgs e)
+        private void ScoreBoardOnPointsThresholdReached(object sender, EventArgs e)
         {
             GameFinished = true;
         }
@@ -79,7 +80,7 @@ namespace GameLogic.Model
         {
             foreach (Player player in Players)
             {
-                PlayingCard[,] playerCards = new PlayingCard[PlayerCardSet.columnCount, PlayerCardSet.rowCount];
+                PlayingCard[,] playerCards = new PlayingCard[PlayerCardSet.rowCount, PlayerCardSet.columnCount];
                 try
                 {
                     for (int i = 0; i < playerCards.GetLength(0); i++)
@@ -90,6 +91,7 @@ namespace GameLogic.Model
                             cards.RemoveAt(0);
                         }
                     }
+                    player.CurrentCardSet = new PlayerCardSet(playerCards);
                 }
                 catch (Exception e)
                 {
@@ -102,9 +104,9 @@ namespace GameLogic.Model
         {
             if (!(exception is RoundFinishedException)) return;
             RoundFinishedException rfe = exception as RoundFinishedException;
-            if (!RoundFinished)
+            if (!LastAction)
             {
-                RoundFinished = true;
+                LastAction = true;
                 RoundFinishingPlayer = rfe.PlayerSource;
             }
         }

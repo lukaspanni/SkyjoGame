@@ -69,12 +69,12 @@ namespace SkyjoConsoleInterface
                 player.FirstTurnAction(coor1.Value, coor2.Value);
             }
 
-            while (!game.RoundFinished)
+            while (!game.LastAction)
             {
                 foreach (Player player in game.Players)
                 {
                     RoundAction(player);
-                    if (game.RoundFinished) break;
+                    if (game.LastAction) break;
                 }
             }
             // Round Finished, every player has one last Action

@@ -7,9 +7,9 @@ namespace GameLogic.Model
 {
     public class ScoreBoard
     {
-        public event EventHandler MaxPointsReached;
+        public event EventHandler PointsThresholdReached;
 
-        public int MaxPoints { get; set; } = 100;
+        public int PointsThreshold { get; set; } = 100;
         public Dictionary<Player, int> Scores { get; private set; }
         
         public ScoreBoard(List<Player> players)
@@ -28,7 +28,7 @@ namespace GameLogic.Model
                 Scores[player] += player.CurrentCardSet.ExposedValueSum;
             }
 
-            if (Scores.Values.Max() >= MaxPoints)
+            if (Scores.Values.Max() >= PointsThreshold)
             {
                 OnMaxPointsReached(EventArgs.Empty);
             }
@@ -36,7 +36,7 @@ namespace GameLogic.Model
 
         protected virtual void OnMaxPointsReached(EventArgs e)
         {
-            EventHandler handler = MaxPointsReached;
+            EventHandler handler = PointsThresholdReached;
             handler?.Invoke(this, e);
         }
 

@@ -1,24 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace GameLogic.Model
 {
     public abstract class Player
     {
-        public PlayingCard TemporaryCard { get; set; }
-        public PlayerCardSet CurrentCardSet { get; set; }
-        public Game Game { get; private set; }
-        public string Id { get; protected set; }
+        private PlayerCardSet _currentCardSet;
+        public PlayingCard TemporaryCard { get; private set; }
 
-        public Player() : this(null, null) { }
-        public Player(PlayerCardSet initialCardSet, Game game)
+        public PlayerCardSet CurrentCardSet
         {
-            CurrentCardSet = initialCardSet;
-            Game = game;
-            Id = CurrentCardSet.GetHashCode().ToString();
+            get => _currentCardSet;
+            set
+            {
+                _currentCardSet = value;
+                if(Id == null && value != null) Id = _currentCardSet.GetHashCode().ToString();
+            }
         }
 
+        public Game Game { get; set; }
+        public string Id { get; protected set; }
+        
 
         public void DrawCovered()
         {

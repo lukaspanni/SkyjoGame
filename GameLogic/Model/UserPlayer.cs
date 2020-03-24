@@ -8,7 +8,7 @@ namespace GameLogic.Model
     {
         public string Name { get; set; }
 
-        public UserPlayer(string name) : base(null, null)
+        public UserPlayer(string name)
         {
             Name = name;
             Id = name;
