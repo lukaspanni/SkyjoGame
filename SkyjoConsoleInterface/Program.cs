@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Channels;
 using GameLogic.Model;
 
 namespace SkyjoConsoleInterface
@@ -51,6 +52,7 @@ namespace SkyjoConsoleInterface
             // First Turn Action
             foreach (Player player in game.Players)
             {
+                DisplayCardSet(player.CurrentCardSet);
                 Console.WriteLine("{0} Expose 2 cards:", player.Id);
                 (byte, byte)? coor1;
                 (byte, byte)? coor2;
@@ -67,6 +69,7 @@ namespace SkyjoConsoleInterface
                     coor2 = ParseCoordinateInput(input);
                 } while (coor2 == null);
                 player.FirstTurnAction(coor1.Value, coor2.Value);
+                DisplayCardSet(player.CurrentCardSet);
             }
 
             while (!game.LastAction)
@@ -89,7 +92,10 @@ namespace SkyjoConsoleInterface
 
         private static void RoundAction(Player player)
         {
+            Console.WriteLine(new string('=', 40) + "\n");
             Console.WriteLine("{0} your turn: ", player.Id);
+            DisplayCardSet(player.CurrentCardSet);
+            Console.WriteLine("The exposed card value is: {0}", player.Game.ExposedCard.Value);
             bool? draw_choice;
             do
             {
@@ -100,24 +106,58 @@ namespace SkyjoConsoleInterface
             if (draw_choice.Value) player.DrawCovered();
             else player.DrawExposed();
 
-            Console.WriteLine("The value of the drawn card is {0}.\n", player.TemporaryCard);
+            Console.WriteLine("The value of the drawn card is {0}.\n", player.TemporaryCard.Value);
             bool? replace_choice;
             do
             {
-                Console.Write("Expose a card (0) or replace a card (1)");
+                Console.Write("Expose a card (0) or replace a card (1): ");
                 replace_choice = ParseBooleanInput(Console.ReadLine());
             } while (replace_choice == null);
 
             (byte, byte)? coordinates;
             do
             {
-                Console.Write("{0} card at coordinates (x,y):", replace_choice.Value ? "Replace" : "Expose");
+                Console.Write("{0} card at coordinates (x,y): ", replace_choice.Value ? "Replace" : "Expose");
                 coordinates = ParseCoordinateInput(Console.ReadLine());
             } while (coordinates == null);
 
             player.CardAction(coordinates.Value, replace_choice.Value);
+            DisplayCardSet(player.CurrentCardSet);
         }
 
+        private static void DisplayCardSet(PlayerCardSet set)
+        {
+            Console.WriteLine();
+            for (int i = -1; i < set.Cards.GetLength(0); i++)
+            {
+                if (i == -1)
+                {
+                    for (int j = 0; j < set.Cards.GetLength(1); j++)
+                    {
+                        if (j == 0) Console.Write("  ║");
+                        Console.Write("  " + j);
+                    }
+
+                    Console.WriteLine("\n" + new string('=', (set.Cards.GetLength(1) + 1) * 3 + 1));
+                    continue;
+                }
+                Console.Write(i + " ║");
+                for (int j = 0; j < set.Cards.GetLength(1); j++)
+                {
+                    if (set.Cards[i, j] == null) Console.Write("{0,3}", " ");
+                    else if (set.Cards[i, j].Exposed) Console.Write("{0,3}", set.Cards[i, j].Value);
+                    else Console.Write("{0,3}", "X");
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+        }
+
+        /// <summary>
+        /// Parse X,Y Coordinate Input
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns>Coordinate-Tuple, null if cannot parse</returns>
         private static (byte, byte)? ParseCoordinateInput(string input)
         {
             if (string.IsNullOrWhiteSpace(input) || input.Length < 3) return null;
