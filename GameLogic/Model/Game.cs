@@ -17,7 +17,8 @@ namespace GameLogic.Model
         public PlayingCard CoveredStackTop { get => _coveredStack.Dequeue(); }
         public PlayingCard ExposedCard { get; set; } = null;
         public ScoreBoard ScoreBoard { get; set; }
-
+        public static (int, int[])[] CardDistribution = new[]
+            {(5, new[] {-2}), (15, new[] {0}), (10, new[] {-1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12})};
 
         public Game(IEnumerable<Player> players)
         {
@@ -64,11 +65,14 @@ namespace GameLogic.Model
         private List<PlayingCard> CreateGameCards()
         {
             List<PlayingCard> cards = new List<PlayingCard>();
-            for (short i = PlayingCard.MinValue; i < PlayingCard.MaxValue; i++)
+            foreach (var tuple in CardDistribution)
             {
-                for (int j = 0; j < 15; j++)
+                foreach (int value in tuple.Item2)
                 {
-                    cards.Add(new PlayingCard(i));
+                    for (int i = 0; i < tuple.Item1; i++)
+                    {
+                        cards.Add(new PlayingCard((short)value));
+                    }
                 }
             }
             cards.Shuffle();
