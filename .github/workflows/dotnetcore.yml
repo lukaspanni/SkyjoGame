@@ -25,5 +25,8 @@ jobs:
         dotnet build --configuration Release
         cd ../SkyjoConsoleInterface
         dotnet build --configuration Release
+        cd ../
     - name: Test with dotnet
-      run: dotnet test  --configuration Release
+      run: |
+        cd GameLogicTests
+        dotnet test  --configuration Release
