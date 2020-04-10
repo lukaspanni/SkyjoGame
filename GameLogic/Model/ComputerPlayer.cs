@@ -45,7 +45,50 @@ namespace GameLogic.Model
 
         private void DecideExposeReplace()
         {
-            //TODO
+            if (TemporaryCard.Value > threshold)
+            {
+                DecisionExpose();
+            }
+            else if (TemporaryCard.Value < threshold)
+            {
+                DecisionReplace();
+            }
+            else
+            {
+                if (random.Next() % 2 == 0) DecisionExpose();
+                else DecisionReplace();
+            }
+        }
+
+        private void DecisionExpose()
+        {
+            List<(PlayingCard, (byte, byte))> covered = new List<(PlayingCard, (byte, byte))>();
+            for (byte i = 0; i < CurrentCardSet.Cards.GetLength(0); i++)
+            {
+                for (byte j = 0; j < CurrentCardSet.Cards.GetLength(1); j++)
+                {
+                    if (!CurrentCardSet.Cards[i, j].Exposed)
+                        covered.Add((CurrentCardSet.Cards[i, j], (i, j)));
+                }
+            }
+            int expose_index = random.Next(covered.Count);
+            CardAction(covered[expose_index].Item2, false);
+        }
+
+        private void DecisionReplace()
+        {
+            (byte, byte) largest_coor = (0, 0);
+            for (byte i = 0; i < CurrentCardSet.Cards.GetLength(0); i++)
+            {
+                for (byte j = 0; j < CurrentCardSet.Cards.GetLength(1); j++)
+                {
+                    if (CurrentCardSet.Cards[i, j].Value > CurrentCardSet.Cards[largest_coor.Item1, largest_coor.Item2].Value) largest_coor = (i, j);
+                }
+            }
+
+            if (CurrentCardSet.Cards[largest_coor.Item1, largest_coor.Item2].Value < TemporaryCard.Value) DecisionExpose();
+            else CardAction(largest_coor, true);
+
         }
     }
 }
