@@ -10,19 +10,17 @@ namespace GameLogic.Model
         private PlayerCardSet _currentCardSet;
         public PlayingCard TemporaryCard { get; private set; }
 
-        public PlayerCardSet CurrentCardSet
-        {
+        public PlayerCardSet CurrentCardSet {
             get => _currentCardSet;
-            set
-            {
+            set {
                 _currentCardSet = value;
-                if(Id == null && value != null) Id = _currentCardSet.GetHashCode().ToString();
+                if (Id == null && value != null) Id = _currentCardSet.GetHashCode().ToString();
             }
         }
 
         public Game Game { get; set; }
         public string Id { get; protected set; }
-        
+
 
         public void DrawCovered()
         {
@@ -35,7 +33,7 @@ namespace GameLogic.Model
         }
 
 
-        public void CardAction((byte,byte)coordinates, bool replace)
+        public void CardAction((byte, byte) coordinates, bool replace)
         {
             if (TemporaryCard == null) throw new InvalidOperationException("A card has to be drawn before this method is called");
             if (replace)
@@ -52,14 +50,15 @@ namespace GameLogic.Model
             try
             {
                 CurrentCardSet.RefreshSet();
-            }catch(RoundFinishedException rfe)
+            }
+            catch (RoundFinishedException rfe)
             {
                 rfe.PlayerSource = this;
                 Game.Notify(rfe);
             }
         }
 
-        public void FirstTurnAction((byte, byte) c1, (byte,byte) c2)
+        public void FirstTurnAction((byte, byte) c1, (byte, byte) c2)
         {
             if (c1.Item1 != c2.Item1 || c1.Item2 != c2.Item2)
             {

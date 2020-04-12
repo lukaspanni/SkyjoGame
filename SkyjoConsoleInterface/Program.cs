@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Channels;
+using GameLogic;
 using GameLogic.Model;
 
 namespace SkyjoConsoleInterface
@@ -25,8 +26,7 @@ namespace SkyjoConsoleInterface
                 }
                 if (players.Count < 2)
                 {
-                    Console.WriteLine("At least 2 players required");
-                    Environment.Exit(0);
+                    players.Add(new ComputerPlayer());
                 }
             }
             else
@@ -48,10 +48,16 @@ namespace SkyjoConsoleInterface
 
         private static void PlayRound(Game game)
         {
-            //TODO: show card values to players
             // First Turn Action
             foreach (Player player in game.Players)
             {
+                if (player is ComputerPlayer com)
+                {
+                    com.AutoFirstTurnAction();
+                    Console.WriteLine("Card set of ComputerPlayer {0}:",com.Id);
+                    DisplayCardSet(com.CurrentCardSet);
+                    continue;
+                }
                 DisplayCardSet(player.CurrentCardSet);
                 Console.WriteLine("{0} Expose 2 cards:", player.Id);
                 (byte, byte)? coor1;
@@ -95,6 +101,14 @@ namespace SkyjoConsoleInterface
             Console.WriteLine(new string('=', 40) + "\n");
             Console.WriteLine("{0} your turn: ", player.Id);
             DisplayCardSet(player.CurrentCardSet);
+            if (player is ComputerPlayer com)
+            {
+                com.AutoPlayRound();
+                Console.WriteLine("ComputerPlayer {0} finished turn. Card Set:", com.Id);
+                DisplayCardSet(com.CurrentCardSet);
+                return;
+            }
+
             Console.WriteLine("The exposed card value is: {0}", player.Game.ExposedCard.Value);
             bool? draw_choice;
             do
@@ -103,25 +117,43 @@ namespace SkyjoConsoleInterface
                 draw_choice = ParseBooleanInput(Console.ReadLine());
             } while (draw_choice == null);
 
-            if (draw_choice.Value) player.DrawCovered();
-            else player.DrawExposed();
-
-            Console.WriteLine("The value of the drawn card is {0}.\n", player.TemporaryCard.Value);
             bool? replace_choice;
-            do
+            if (draw_choice.Value)
             {
-                Console.Write("Expose a card (0) or replace a card (1): ");
-                replace_choice = ParseBooleanInput(Console.ReadLine());
-            } while (replace_choice == null);
+                player.DrawCovered();
+                Console.WriteLine("The value of the drawn card is {0}.", player.TemporaryCard.Value);
+                do
+                {
+                    Console.Write("Expose a card (0) or replace a card (1): ");
+                    replace_choice = ParseBooleanInput(Console.ReadLine());
+                } while (replace_choice == null);
+            }
+            else
+            {
+                player.DrawExposed();
+                replace_choice = true;
+            }
 
             (byte, byte)? coordinates;
             do
             {
                 Console.Write("{0} card at coordinates (x,y): ", replace_choice.Value ? "Replace" : "Expose");
                 coordinates = ParseCoordinateInput(Console.ReadLine());
+                if (coordinates != null)
+                {
+                    try
+                    {
+                        player.CardAction(coordinates.Value, replace_choice.Value);
+                        break;
+                    }
+                    catch (CouldNotExposeError)
+                    {
+                        Console.WriteLine("Expose Failed, try again:");
+                        coordinates = null;
+                    }
+                }
             } while (coordinates == null);
 
-            player.CardAction(coordinates.Value, replace_choice.Value);
             DisplayCardSet(player.CurrentCardSet);
         }
 

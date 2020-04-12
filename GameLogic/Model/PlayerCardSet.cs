@@ -88,12 +88,15 @@ namespace GameLogic.Model
 
         public void Expose((byte,byte) coordinates)
         {
-            if (CheckDimensions(coordinates) && !Cards[coordinates.Item1, coordinates.Item2].Exposed)
+            if (CheckDimensions(coordinates) && Cards[coordinates.Item1, coordinates.Item2] != null && !Cards[coordinates.Item1, coordinates.Item2].Exposed)
             {
                 Cards[coordinates.Item1, coordinates.Item2].Exposed = true;
                 ExposedValueSum += Cards[coordinates.Item1, coordinates.Item2].Value;
             }
-            //TODO: Notify caller that Expose Failed => Exception
+            else
+            {
+                throw new CouldNotExposeError();
+            }
         }
 
         public PlayingCard Replace(PlayingCard replacement, (byte, byte) coordinates)
@@ -121,7 +124,7 @@ namespace GameLogic.Model
             int sum = 0;
             foreach (PlayingCard card in Cards)
             {
-                card.Exposed = true;
+                if (card != null) card.Exposed = true;
                 sum += card.Value;
             }
             ExposedValueSum = sum;

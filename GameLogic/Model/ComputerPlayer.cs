@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection.PortableExecutable;
 using System.Text;
 
 namespace GameLogic.Model
 {
     public class ComputerPlayer : Player
     {
+        private static int comCount = 0;
         private int threshold;
         private Random random;
 
         public ComputerPlayer()
         {
+            Id = "COM" + comCount++;
             random = new Random();
             int sum = 0;
             int count = 0;
@@ -26,7 +29,20 @@ namespace GameLogic.Model
             threshold = sum / count;
         }
 
-        private void DecideCoverdExposed()
+        public void AutoFirstTurnAction()
+        {
+            (byte, byte) coor1 = ((byte)random.Next(2), (byte)random.Next(3));
+            (byte, byte) coor2 = ((byte)random.Next(2), (byte)random.Next(3));
+            FirstTurnAction(coor1, coor2);
+        }
+
+        public void AutoPlayRound()
+        {
+            DecideCoveredExposed();
+            DecideExposeReplace();
+        }
+
+        private void DecideCoveredExposed()
         {
             if (Game.ExposedCard.Value > threshold)
             {

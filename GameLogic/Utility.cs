@@ -26,6 +26,11 @@ namespace GameLogic
         }
     }
 
+    public class CouldNotExposeError : Exception
+    {
+
+    }
+
     public static class ListUtility
     {
         private static readonly Random random = new Random();
