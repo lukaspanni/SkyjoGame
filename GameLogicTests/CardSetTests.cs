@@ -67,7 +67,19 @@ namespace GameLogicTests
 
             cardSet.Replace(card,coordinates);
             Assert.Equal(val, cardSet.ExposedValueSum);
-            
+        }
+
+        [Theory]
+        [InlineData(1,1, false)]
+        [InlineData(0,1, false)]
+        [InlineData(2,2, false)]
+        [InlineData(3,1, true)]
+        [InlineData(0,4, true)]
+        public void CardSet_ExposeNonExisting(byte x, byte y, bool outOfBounds)
+        {
+            if (!outOfBounds)
+                cardSet.Cards[x, y] = null;
+            Assert.Throws<CouldNotExposeError>(() => cardSet.Expose((x, y)));
         }
 
         [Theory]

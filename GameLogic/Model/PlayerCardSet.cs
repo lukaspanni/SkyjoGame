@@ -79,7 +79,7 @@ namespace GameLogic.Model
 
         private bool CheckDimensions((byte,byte) coordinates)
         {
-            if (coordinates.Item1 <= Cards.GetLength(0) && coordinates.Item2 <= Cards.GetLength(1))
+            if (coordinates.Item1 < Cards.GetLength(0) && coordinates.Item2 < Cards.GetLength(1))
             {
                 return true;
             }
